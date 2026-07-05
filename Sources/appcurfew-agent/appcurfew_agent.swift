@@ -6,6 +6,8 @@ import ArgumentParser
 
 @main
 struct AppCurfewAgent: AsyncParsableCommand {
+    
+    
     @Option(help: "Path to the config file")
     var configPath: String = "/etc/appcurfew/config.json"
 

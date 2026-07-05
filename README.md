@@ -39,7 +39,7 @@ the OS (`FlatpakInspector.swift`) — everything else is already platform-agnost
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Xocash695/appcurfew-agent/main/install.sh | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Xocash695/appcurfew-agent/main/install.sh)"
 ```
 
 You'll be prompted for:

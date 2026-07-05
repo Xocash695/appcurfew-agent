@@ -13,16 +13,29 @@ struct Agent {
     let pollInterval: UInt64 = 10 //every seconds it gets polled to see what is allowed or not
 
     func runOnce() async throws {
+        print("Step 1: listing installed apps...")
         let installed = try flatpakInspector.listInstalledApps()
+        print("Step 1 done, found \(installed.count) apps")
+        
+        print("Step 2: reporting installed apps...")
         try await apiClient.reportInstalledApps(installed)
+        print("Step 2 done")
 
+        print("Step 3: fetching allowed apps...")
         let allowed = try await apiClient.fetchAllowedApps()
+        print("Step 3 done, allowed: \(allowed)")
+
+        print("Step 4: checking running apps...")
         let running = try flatpakInspector.runningAppIdentifiers(forUser: childUsername)
+        print("Step 4 done, running: \(running)")
 
         let disallowedRunning = running.subtracting(allowed)
+        print("Disallowed running: \(disallowedRunning)")
+        
         for appID in disallowedRunning {
+            print("Killing \(appID)...")
             try flatpakInspector.kill(appID: appID)
-            print("Blocked \(appID) — not on the allowed list")
+            print("Killed \(appID)")
         }
 
         let allowedAndRunning = running.intersection(allowed)
