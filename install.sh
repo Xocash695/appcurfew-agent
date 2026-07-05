@@ -9,7 +9,7 @@ fi
 
 echo "Found Swift: $(swift --version | head -1)"
 
-REPO_URL="https://github.com/YOUR_USERNAME/appcurfew-agent.git"
+REPO_URL="https://github.com/Xocash695/appcurfew-agent.git"
 INSTALL_DIR="/opt/appcurfew-agent"
 
 echo "Cloning appcurfew-agent..."
