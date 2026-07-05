@@ -1,11 +1,11 @@
 [Unit]
-Description=AppCurfew Enforcement Agent
+Description=AppCurfew Enforcement Agent (%i)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/appcurfew-agent
+ExecStart=/usr/local/bin/appcurfew-agent --config-path /etc/appcurfew/%i.json
 Restart=always
 RestartSec=5
 User=root
