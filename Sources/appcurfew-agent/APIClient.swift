@@ -6,7 +6,9 @@
 //
 
 import Foundation
-
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 struct APIClient {
     let baseURL: URL
     let apiKey: String

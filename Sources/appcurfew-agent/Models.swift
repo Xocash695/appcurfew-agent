@@ -10,8 +10,8 @@ import Foundation
 struct AgentConfig: Codable {
     let serverURL: String
     let apiKey: String
+    let childUsername: String
 }
-
 struct InstalledAppReport: Codable {
     let id: String
     let name: String

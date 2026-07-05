@@ -9,11 +9,15 @@ import Foundation
 struct Agent {
     let apiClient: APIClient
     let flatpakInspector: FlatpakInspector
-    let pollInterval: UInt64 = 60  // seconds
+    let childUsername: String
+    let pollInterval: UInt64 = 10 //every seconds it gets polled to see what is allowed or not
 
     func runOnce() async throws {
+        let installed = try flatpakInspector.listInstalledApps()
+        try await apiClient.reportInstalledApps(installed)
+
         let allowed = try await apiClient.fetchAllowedApps()
-        let running = try flatpakInspector.runningAppIdentifiers()
+        let running = try flatpakInspector.runningAppIdentifiers(forUser: childUsername)
 
         let disallowedRunning = running.subtracting(allowed)
         for appID in disallowedRunning {
@@ -27,6 +31,7 @@ struct Agent {
             print("Reported \(pollInterval)s of usage for \(appID)")
         }
     }
+
 
     func run() async {
         while true {
