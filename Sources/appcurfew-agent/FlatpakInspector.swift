@@ -43,7 +43,7 @@ struct FlatpakInspector {
     
     func runningAppIdentifiers(forUser username: String) throws -> Set<String> {
         let output = try runFlatpak(arguments: ["ps", "--columns=application,child-pid"])
-
+        print("RAW flatpak ps output: \(output.debugDescription)") 
         let lines = output.split(separator: "\n").map(String.init)
             .filter { !$0.hasPrefix("Application") }   // skip the header row
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
