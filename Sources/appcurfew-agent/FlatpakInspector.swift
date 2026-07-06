@@ -27,11 +27,37 @@ struct FlatpakInspector {
         return apps
     }
     
-    private func runFlatpak(arguments: [String]) throws -> String {
+    private func uid(for username: String) throws -> String {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/flatpak")
-        process.arguments = arguments
-        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/id")
+        process.arguments = ["-u", username]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        try process.run()
+        process.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8) ?? ""
+        return output.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func runFlatpak(arguments: [String], asUser username: String? = nil) throws -> String {
+        let process = Process()
+        if let username {
+            // The agent runs as root, but Flatpak sandboxes are tracked
+            // per-user, so root can't see or control another user's running
+            // instances. Re-enter the target user's session with the right
+            // XDG_RUNTIME_DIR so flatpak has the correct per-user context.
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+            process.arguments = ["-u", username, "env",
+                                 "XDG_RUNTIME_DIR=/run/user/\(try uid(for: username))",
+                                 "flatpak"] + arguments
+        } else {
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/flatpak")
+            process.arguments = arguments
+        }
+
         let pipe = Pipe()
         process.standardOutput = pipe
         try process.run()
@@ -42,8 +68,8 @@ struct FlatpakInspector {
     }
     
     func runningAppIdentifiers(forUser username: String) throws -> Set<String> {
-        let output = try runFlatpak(arguments: ["ps", "--columns=application,child-pid"])
-        print("RAW flatpak ps output: \(output.debugDescription)") 
+        let output = try runFlatpak(arguments: ["ps", "--columns=application,child-pid"], asUser: username)
+        print("RAW flatpak ps output: \(output.debugDescription)")
         let lines = output.split(separator: "\n").map(String.init)
             .filter { !$0.hasPrefix("Application") }   // skip the header row
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -81,9 +107,7 @@ struct FlatpakInspector {
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    func kill(appID: String) throws {
-         _ = try runFlatpak(arguments: ["kill", appID]) // tossing the output in the garbage cause we don't care
-        // hint: `flatpak kill <appID>` is the real command
-        // reuse runFlatpak(arguments: [...]) — you don't need to read its output this time
+    func kill(appID: String, asUser username: String) throws {
+         _ = try runFlatpak(arguments: ["kill", appID], asUser: username) // tossing the output in the garbage cause we don't care
     }
 }

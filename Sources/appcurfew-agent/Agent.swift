@@ -34,7 +34,7 @@ struct Agent {
         
         for appID in disallowedRunning {
             print("Killing \(appID)...")
-            try flatpakInspector.kill(appID: appID)
+            try flatpakInspector.kill(appID: appID, asUser: childUsername)
             print("Killed \(appID)")
         }
 
