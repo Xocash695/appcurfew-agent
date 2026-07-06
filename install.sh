@@ -10,20 +10,15 @@ fi
 echo "Found Swift: $(swift --version | head -1)"
 
 REPO_URL="https://github.com/Xocash695/appcurfew-agent.git"
-INSTALL_DIR="/opt/appcurfew-agent"
+BUILD_DIR="$(mktemp -d)"
 
-echo "Cloning appcurfew-agent..."
-if [ -d "$INSTALL_DIR" ]; then
-    echo "Existing install found, pulling latest..."
-    sudo git -C "$INSTALL_DIR" pull
-else
-    sudo git clone "$REPO_URL" "$INSTALL_DIR"
-fi
+echo "Cloning appcurfew-agent into a temporary build directory..."
+git clone "$REPO_URL" "$BUILD_DIR"
 
-cd "$INSTALL_DIR"
+cd "$BUILD_DIR"
 
 echo "Building appcurfew-agent (release mode)..."
-sudo swift build -c release
+swift build -c release
 
 echo "Installing binary to /usr/local/bin..."
 sudo cp .build/release/appcurfew-agent /usr/local/bin/appcurfew-agent
@@ -50,7 +45,13 @@ echo "Config written to $CONFIG_PATH"
 sudo systemctl enable --now "appcurfew-agent@${CHILD_USERNAME}"
 
 echo ""
+echo "Cleaning up build files..."
+cd /
+rm -rf "$BUILD_DIR"
+
+echo ""
 echo "Done! Check status with: sudo systemctl status appcurfew-agent@${CHILD_USERNAME}"
 echo "View live logs with: sudo journalctl -u appcurfew-agent@${CHILD_USERNAME} -f"
 echo ""
-echo "To add ANOTHER child on this same machine, just run this script again."
+echo "To add ANOTHER child on this same machine, run this script again."
+echo "To UPDATE the agent later, just re-run this install script — it always builds fresh."
