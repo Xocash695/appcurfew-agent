@@ -17,12 +17,22 @@ git clone "$REPO_URL" "$BUILD_DIR"
 
 cd "$BUILD_DIR"
 
-echo "Building appcurfew-agent (release mode)..."
+echo "Building appcurfew-agent and appcurfew-status (release mode)..."
 swift build -c release
 
-echo "Installing binary to /usr/local/bin..."
+echo "Stopping any running agent instances before replacing the binary..."
+for service in /etc/systemd/system/appcurfew-agent@*.service; do
+    [ -e "$service" ] || continue
+    instance="$(basename "$service" .service)"
+    sudo systemctl stop "$instance" 2>/dev/null || true
+done
+
+echo "Installing binaries to /usr/local/bin..."
 sudo cp .build/release/appcurfew-agent /usr/local/bin/appcurfew-agent
 sudo chmod +x /usr/local/bin/appcurfew-agent
+
+sudo cp .build/release/appcurfew-status /usr/local/bin/appcurfew-status
+sudo chmod +x /usr/local/bin/appcurfew-status
 
 echo "Installing systemd template unit..."
 sudo cp appcurfew-agent@.service /etc/systemd/system/appcurfew-agent@.service
@@ -54,6 +64,7 @@ rm -rf "$BUILD_DIR"
 echo ""
 echo "Done! Check status with: sudo systemctl status appcurfew-agent@${CHILD_USERNAME}"
 echo "View live logs with: sudo journalctl -u appcurfew-agent@${CHILD_USERNAME} -f"
+echo "Check remaining time with: appcurfew-status --config-path ${CONFIG_PATH}"
 echo ""
 echo "To add ANOTHER child on this same machine, run this script again."
 echo "To UPDATE the agent later, just re-run this install script — it always builds fresh."
