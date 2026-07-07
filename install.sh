@@ -21,9 +21,8 @@ echo "Building appcurfew-agent and appcurfew-status (release mode)..."
 swift build -c release
 
 echo "Stopping any running agent instances before replacing the binary..."
-for service in /etc/systemd/system/appcurfew-agent@*.service; do
-    [ -e "$service" ] || continue
-    instance="$(basename "$service" .service)"
+RUNNING_INSTANCES=$(systemctl list-units --all --type=service --plain --no-legend 'appcurfew-agent@*.service' | awk '{print $1}')
+for instance in $RUNNING_INSTANCES; do
     sudo systemctl stop "$instance" 2>/dev/null || true
 done
 
