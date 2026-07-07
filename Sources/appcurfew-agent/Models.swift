@@ -29,3 +29,8 @@ struct UsageReportRequest: Codable {
 struct UsageReportResponse: Codable {
     let remainingSeconds: Int?
 }
+
+struct AllowedAppStatus: Codable {
+    let appIdentifier: String
+    let remainingSeconds: Int?
+}

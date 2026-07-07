@@ -20,6 +20,12 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
         ),
+        .executableTarget(
+            name: "appcurfew-status",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+        ),
         .testTarget(
             name: "appcurfew-agentTests",
             dependencies: ["appcurfew-agent"]

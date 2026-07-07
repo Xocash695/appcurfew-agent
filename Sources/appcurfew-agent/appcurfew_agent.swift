@@ -22,7 +22,8 @@ struct AppCurfewAgent: AsyncParsableCommand {
 
         let apiClient = APIClient(baseURL: baseURL, apiKey: config.apiKey)
         let flatpakInspector = FlatpakInspector()
-        let agent = Agent(apiClient: apiClient, flatpakInspector: flatpakInspector, childUsername: config.childUsername)
+        let notificationSender = NotificationSender()
+        let agent = Agent(apiClient: apiClient, flatpakInspector: flatpakInspector, notificationSender: notificationSender, childUsername: config.childUsername)
 
         print("AppCurfew agent starting, polling every \(agent.pollInterval)s...")
         await agent.run()

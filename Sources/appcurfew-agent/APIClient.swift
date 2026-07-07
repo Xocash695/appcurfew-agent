@@ -13,12 +13,12 @@ struct APIClient {
     let baseURL: URL
     let apiKey: String
 
-    func fetchAllowedApps() async throws -> [String] {
+    func fetchAllowedApps() async throws -> [AllowedAppStatus] {
         var request = URLRequest(url: baseURL.appendingPathComponent("allowed-apps"))
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        return try JSONDecoder().decode([String].self, from: data)
+        return try JSONDecoder().decode([AllowedAppStatus].self, from: data)
     }
 
     func reportUsage(appIdentifier: String, secondsUsed: Int) async throws {

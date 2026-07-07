@@ -40,6 +40,8 @@ read -p "This child's API key: " API_KEY
 
 CONFIG_PATH="/etc/appcurfew/${CHILD_USERNAME}.json"
 echo "{\"serverURL\": \"$SERVER_URL\", \"apiKey\": \"$API_KEY\", \"childUsername\": \"$CHILD_USERNAME\"}" | sudo tee "$CONFIG_PATH" > /dev/null
+sudo chown "root:${CHILD_USERNAME}" "$CONFIG_PATH"
+sudo chmod 640 "$CONFIG_PATH"
 echo "Config written to $CONFIG_PATH"
 
 sudo systemctl enable --now "appcurfew-agent@${CHILD_USERNAME}"
