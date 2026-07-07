@@ -29,16 +29,18 @@ struct NotificationSender {
         let body = "\(appID) — \(minutesLeft) minute\(minutesLeft == 1 ? "" : "s") left today"
 
         // The agent runs as root, so we re-enter the child's session to reach
-        // their desktop. A graphical notification needs three pieces of the
-        // user's session context: XDG_RUNTIME_DIR (the runtime dir), DISPLAY
-        // (the X server), and DBUS_SESSION_BUS_ADDRESS (the session bus that
-        // notify-send actually delivers over).
+        // their desktop. A graphical notification needs two pieces of the
+        // user's session context: XDG_RUNTIME_DIR (the runtime dir) and
+        // DBUS_SESSION_BUS_ADDRESS (the session bus notify-send delivers over).
+        // Note: DISPLAY is deliberately NOT set — modern desktops (like KDE on
+        // Wayland) don't need it for notifications, and hardcoding X11's :0
+        // would be wrong on Wayland sessions anyway. D-Bus is the actual
+        // delivery mechanism regardless of display server.
         let uid = try uid(for: username)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
         process.arguments = ["-u", username, "env",
                              "XDG_RUNTIME_DIR=/run/user/\(uid)",
-                             "DISPLAY=:0",
                              "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\(uid)/bus",
                              "notify-send",
                              "Screen Time Warning",

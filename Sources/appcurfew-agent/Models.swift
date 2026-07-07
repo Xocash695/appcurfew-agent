@@ -11,6 +11,7 @@ struct AgentConfig: Codable {
     let serverURL: String
     let apiKey: String
     let childUsername: String
+    let warnThresholdSeconds: Int?
 }
 struct InstalledAppReport: Codable {
     let id: String

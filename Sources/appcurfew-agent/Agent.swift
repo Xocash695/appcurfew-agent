@@ -11,6 +11,7 @@ struct Agent {
     let flatpakInspector: FlatpakInspector
     let notificationSender: NotificationSender
     let childUsername: String
+    let warnThresholdSeconds: Int
     let pollInterval: UInt64 = 10 //every seconds it gets polled to see what is allowed or not
 
     func runOnce(warnedToday: inout Set<String>) async throws {
@@ -53,7 +54,7 @@ struct Agent {
             // time, the child is down to their last two minutes, and we haven't
             // already warned about this app.
             if let remaining = remainingByApp[appID] ?? nil,
-               remaining > 0, remaining <= 120,
+               remaining > 0, remaining <= warnThresholdSeconds,
                !warnedToday.contains(appID) {
                 try notificationSender.sendWarning(appID: appID, secondsLeft: remaining, username: childUsername)
                 warnedToday.insert(appID)
