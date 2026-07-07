@@ -46,9 +46,12 @@ echo ""
 read -p "Child's Linux username on this machine: " CHILD_USERNAME
 read -p "Server URL (e.g. http://100.x.x.x:8080): " SERVER_URL
 read -p "This child's API key: " API_KEY
+read -p "Warn the child how many minutes before an app's time runs out? (default 2): " WARN_MINUTES
+WARN_MINUTES=${WARN_MINUTES:-2}
+WARN_SECONDS=$((WARN_MINUTES * 60))
 
 CONFIG_PATH="/etc/appcurfew/${CHILD_USERNAME}.json"
-echo "{\"serverURL\": \"$SERVER_URL\", \"apiKey\": \"$API_KEY\", \"childUsername\": \"$CHILD_USERNAME\"}" | sudo tee "$CONFIG_PATH" > /dev/null
+echo "{\"serverURL\": \"$SERVER_URL\", \"apiKey\": \"$API_KEY\", \"childUsername\": \"$CHILD_USERNAME\", \"warnThresholdSeconds\": $WARN_SECONDS}" | sudo tee "$CONFIG_PATH" > /dev/null
 sudo chown "root:${CHILD_USERNAME}" "$CONFIG_PATH"
 sudo chmod 640 "$CONFIG_PATH"
 echo "Config written to $CONFIG_PATH"
